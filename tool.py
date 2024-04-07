@@ -14,7 +14,7 @@ document.write(decodeURIComponent(atob(\''''
 '''
 
 	@staticmethod
-	def decode(data):
+	def _decode(data):
 		data = data.encode("utf-8")
 		data = base64.b64decode(data)
 		data = data.decode("utf-8")
@@ -26,7 +26,7 @@ document.write(decodeURIComponent(atob(\''''
 			yield self._decode(data[88:-102])
 
 	@staticmethod
-	def encode(data):
+	def _encode(data):
 		data = quote(data)
 		data = data.encode("utf-8")
 		data = base64.b64encode(data)
@@ -35,7 +35,7 @@ document.write(decodeURIComponent(atob(\''''
 
 	def encode_data_lst(self, data_lst: list):
 		for data in data_lst:
-			yield self.start_text + self._encode(file) + self.end_text
+			yield self.start_text + self._encode(data) + self.end_text
 
 
 if __name__ == "__main__":
@@ -53,14 +53,14 @@ if __name__ == "__main__":
 				sys.exit(0)
 			file_data, message_insert = open(file, mode="r", encoding="utf-8").read(), ""
 			if mode == "obf":
-				finished_data, message_insert = encoder.encode(file_data), "Obfuscated"
+				finished_data, message_insert = next(encoder.encode_data_lst([file_data])), "Obfuscated "
 			elif mode == "deobf":
-				finished_data, message_insert = encoder.decode(file_data), "De-obfuscated"
+				finished_data, message_insert = next(encoder.decode_data_lst([file_data])), "De-obfuscated "
 			else:
 				for chunk in usage:
 					print(chunk)
 				sys.exit(0)
-			open(file, mode="w", encoding="utf-8").write(encoded_file_data)
+			open(file, mode="w", encoding="utf-8").write(finished_data)
 			print("\nSuccessfully %s" % message_insert + file)
 	else:
 		for chunk in usage:
