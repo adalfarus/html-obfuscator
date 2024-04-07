@@ -2,48 +2,66 @@ import sys, os, base64
 from urllib.parse import unquote
 from urllib.parse import quote
 
-usage = '''\nUsage: this.py [obf|deobf] [filename.html]\n\nNOTE: Files deobfuscated with this tool MUST have been obfuscated with it as well.'''
 
-if len(sys.argv)!=3:
-	print(usage)
-	sys.exit(0)
-opr=sys.argv[1]
-file=sys.argv[2]
-if not os.path.isfile(file):
-	print('''\nFile not found!''')
-	sys.exit(0)
-	
-begst = '''<!DOCTYPE html>
+class HtmlObfuscator:
+	def __init__(self):
+		self.start_text = '''<!DOCTYPE html>
 <script type="text/javascript">
 document.write(decodeURIComponent(atob(\''''
-
-endst = '''\')));
+		self.end_text = '''\')));
 </script>
 <noscript>You must enable javascript in your browser to view this webpage.</noscript>
 '''
 
-def dEncode(data):
-	data = quote(data)
-	data = data.encode("utf-8")
-	data = base64.b64encode(data)
-	data = data.decode("utf-8")
-	return data
+	@staticmethod
+	def decode(data):
+		data = data.encode("utf-8")
+		data = base64.b64decode(data)
+		data = data.decode("utf-8")
+		data = unquote(data)
+		return data
 
-def dDecode(data):
-	data = data.encode("utf-8")
-	data = base64.b64decode(data)
-	data = data.decode("utf-8")
-	data = unquote(data)
-	return data
+	def decode_data_lst(self, data_lst: list):
+		for data in data_lst:
+			yield self._decode(data[88:-102])
 
-if opr == "obf":
-	data = open(file, mode="r", encoding="utf-8").read()
-	open(file, mode="w", encoding="utf-8").write(begst + dEncode(data) + endst)
-	print("\nSuccesfully Obfuscated %s" % file)
-elif opr == "deobf":
-	data = open(file, mode="r", encoding="utf-8").read()
-	open(file, mode="w", encoding="utf-8").write(dDecode(data[88:-102]))
-	print("\nSuccesfully Deobfuscated %s" % file)
-else:
-	print(usage)
-	sys.exit(0)
+	@staticmethod
+	def encode(data):
+		data = quote(data)
+		data = data.encode("utf-8")
+		data = base64.b64encode(data)
+		data = data.decode("utf-8")
+		return data
+
+	def encode_data_lst(self, data_lst: list):
+		for data in data_lst:
+			yield self.start_text + self._encode(file) + self.end_text
+
+
+if __name__ == "__main__":
+	usage = ['Usage: this.py [obf|deobf] [filename.html] [filename2.html] ...\n',
+			 'NOTE: Files de-obfuscated with this tool MUST have been obfuscated with it as well.']
+	if len(sys.argv) > 2:
+		mode = sys.argv[1]
+		files = sys.argv[2:]
+
+		encoder = HtmlObfuscator()
+
+		for file in files:
+			if not os.path.isfile(file):
+				print('''\nFile not found!''')
+				sys.exit(0)
+			file_data, message_insert = open(file, mode="r", encoding="utf-8").read(), ""
+			if mode == "obf":
+				finished_data, message_insert = encoder.encode(file_data), "Obfuscated"
+			elif mode == "deobf":
+				finished_data, message_insert = encoder.decode(file_data), "De-obfuscated"
+			else:
+				for chunk in usage:
+					print(chunk)
+				sys.exit(0)
+			open(file, mode="w", encoding="utf-8").write(encoded_file_data)
+			print("\nSuccessfully %s" % message_insert + file)
+	else:
+		for chunk in usage:
+			print(chunk)

@@ -1,18 +1,8 @@
 # HTML Obfuscator
 
-Simple python tool to help you obfuscate/deobfuscate your HTML code quickly.
+Simple python tool to help you obfuscate/de-obfuscate your HTML code quickly. Obfuscated html will run without needing to be de-obfuscated.
 
-Manual tools also included.
-
-
-
-One-at-a-time Usage:
+Usage:
 ```tool.py [obf|deobf] [filename.html]```
 
-Batch Usage:
-```batch.py [obf|deobf]```
-For batch usage, one should have a list of html files in list.txt, separated by new lines.
-
-
-
-Also note that files deobfuscated with this tool MUST have been obfuscated with it as well.
+Also note that files de-obfuscated with this tool MUST have been obfuscated with it as well.
